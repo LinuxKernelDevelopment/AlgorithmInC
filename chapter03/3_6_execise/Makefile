@@ -1,6 +1,6 @@
 .PHONY: main
 
-TARGET := chrcnt palindrome kmpmatch kmpblank substringrm strpointer
+TARGET := chrcnt palindrome kmpmatch kmpblank substringrm strpointer blanklength
 
 OBJFILE := $(addsuffix .o,$(TARGET))
 main: $(TARGET)
