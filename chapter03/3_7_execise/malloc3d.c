@@ -29,6 +29,6 @@ int main(int argc, char *argv[])
 			for (int k = 0; k < 10; k++)
 				printf("%d ", arr3d[i][j][k]);
 		}
-	}	
+	}
 	return 0;
 }
