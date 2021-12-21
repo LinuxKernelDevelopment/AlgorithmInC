@@ -1,3 +1,3 @@
-TARGET := malloc3d sortarray
+TARGET := malloc3d sortarray gcd
 
 -include ../../build.rule
