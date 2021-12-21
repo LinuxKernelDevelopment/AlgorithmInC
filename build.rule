@@ -1,0 +1,9 @@
+
+.PHONY: main
+
+OBJFILE := $(addsuffix .o, $(TARGET))
+
+main: $(TARGET)
+
+clean:
+	$(RM) $(TARGET) $(OBJFILE)
