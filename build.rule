@@ -5,5 +5,8 @@ OBJFILE := $(addsuffix .o, $(TARGET))
 
 main: $(TARGET)
 
+%.o : %.c
+	$(CC) -g -c $^
+
 clean:
 	$(RM) $(TARGET) $(OBJFILE)

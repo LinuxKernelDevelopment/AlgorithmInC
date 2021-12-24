@@ -14,3 +14,4 @@ struct sparseMatrix {
 void dumpMatrixArray(int **matrix, int r, int c);
 struct sparseMatrix *sparseMatrixInit(int **MatrixArray, int row, int col);
 void dumpSparseMatrix(struct sparseMatrix *sMatrix);
+struct sparseMatrix *sparseMatrixMultiply(struct sparseMatrix *ma, struct sparseMatrix *mb);
