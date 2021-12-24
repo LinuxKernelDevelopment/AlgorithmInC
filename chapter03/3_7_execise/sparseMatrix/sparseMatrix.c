@@ -67,12 +67,12 @@ struct sparseMatrix *sparseMatrixMultiply(struct sparseMatrix *ma, struct sparse
 
 	maColTmp = malloc(ma->colNum * sizeof(struct elem *));
 	for (int i = 0; i < ma->colNum; i++) {
-		maColTmp[i] = &(ma->col[i]);
+		maColTmp[i] = ma->col[i].colNext;
 	}
 
 	mbRowTmp = malloc(mb->rowNum * sizeof(struct elem *));
 	for (int i = 0; i < mb->rowNum; i++) {
-		mbRowTmp[i] = &(mb->row[i]);
+		mbRowTmp[i] = mb->row[i].rowNext;
 	}
 
 
@@ -105,15 +105,17 @@ struct sparseMatrix *sparseMatrixMultiply(struct sparseMatrix *ma, struct sparse
 			struct elem *rowTmp = ma->row[i].rowNext;
 			struct elem *colTmp = mb->col[j].colNext;
 			for (k = 0; k < ma->colNum; k++) {
-				if (rowTmp == maColTmp[k]->colNext &&
-					colTmp == mbRowTmp[k]->rowNext) {
+				if (!mbRowTmp[j] || !maColTmp[k])
+					break;
+				if (rowTmp == maColTmp[k] &&
+					colTmp == mbRowTmp[k]) {
 					sum += rowTmp->val * colTmp->val;
 					//maColTmp[k] = maColTmp[k]->colNext;
 					mbRowTmp[k] = mbRowTmp[k]->rowNext;
 					rowTmp = rowTmp->rowNext;
 					colTmp = colTmp->colNext;
 				} else if (rowTmp == maColTmp[k]->colNext) {
-					//maColTmp[k] = maColTmp[k]->colNext;
+					maColTmp[k] = maColTmp[k]->colNext;
 					rowTmp = rowTmp->rowNext;
 				} else if (colTmp = mbRowTmp[j]->rowNext) {
 					mbRowTmp[j] = mbRowTmp[j]->rowNext;
@@ -133,18 +135,18 @@ struct sparseMatrix *sparseMatrixMultiply(struct sparseMatrix *ma, struct sparse
 		}
 		struct elem *rowTmp = ma->row[i].rowNext;
 		for (k = 0; k < ma->colNum; k++) {
-			if (rowTmp == maColTmp[k]->colNext) {
+			if (rowTmp == maColTmp[k]) {
 			       maColTmp[k] = maColTmp[k]->colNext;
 			       rowTmp = rowTmp->rowNext;
 		        }	       
 		}
-		struct elem *colTmp = mb->col[j].colNext;
+		/*struct elem *colTmp = mb->col[j].colNext;
 		for (k = 0; k < mb->rowNum; k++) {
 			if (colTmp == mbRowTmp[k]->rowNext) {
 				mbRowTmp[k] = mbRowTmp[k]->rowNext;
 				colTmp = colTmp->colNext;
 			}
-		}
+		}*/
 	}
 	return rMatrix;
 }
