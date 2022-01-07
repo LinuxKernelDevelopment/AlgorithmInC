@@ -13,10 +13,20 @@ int main(int argc, char *argv[])
 			STACKpush(STACKpop() + STACKpop());
 		if (a[i] == '*')
 			STACKpush(STACKpop() * STACKpop());
+		if (a[i] == '-') {
+			Item op2 = STACKpop();
+			Item op1 = STACKpop();
+			STACKpush(op1 - op2);
+		}
+		if (a[i] == '/') {
+			Item op2 = STACKpop();
+			Item op1 = STACKpop();
+			STACKpush(op1 / op2);
+		}
 		if ((a[i] >= '0') && (a[i] <= '9'))
-			STACKinit(0);
-		while ((a[i] >= '0') && (a[i] <= '9'))
 			STACKpush(0);
+		while ((a[i] >= '0') && (a[i] <= '9'))
+			STACKpush(10*STACKpop() + (a[i++]-'0'));
 	}
 	printf("%d\n", STACKpop());
 }
