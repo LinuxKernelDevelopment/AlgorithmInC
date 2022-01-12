@@ -91,7 +91,7 @@ char *infixToPostfix(char *a)
 
 			if (a[i] >= 48 && a[i] <= 57) {
 				int j = i;
-				while (a[j] >= 65 && a[j] <=122)
+				while (a[j] >= 48 && a[j] <= 57)
 					j++;
 				char *key = calloc(j - i + 2, 1);
 				memcpy(key, &a[i], j - i + 1);
