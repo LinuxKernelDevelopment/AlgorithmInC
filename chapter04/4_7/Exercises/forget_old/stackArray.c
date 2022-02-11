@@ -22,10 +22,12 @@ void STACKpush(Item item)
 		if (s[i] == item)
 			break;
 	}
-	for (j = i; j < N - 1; j++) {
-		s[j] = s[j+1];
+	if (i != N) {
+		for (j = i; j < N - 1; j++) {
+			s[j] = s[j+1];
+		}
+		N -= 1;
 	}
-	N -= 1;
 	s[N++] = item;
 }
 
