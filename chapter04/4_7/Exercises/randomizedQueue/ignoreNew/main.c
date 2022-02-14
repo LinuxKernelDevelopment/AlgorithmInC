@@ -1,0 +1,40 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include "Item.h"
+#include "randomizedQueueArray.h"
+
+void processBuf(char *buf, size_t n)
+{
+	randomizedQueueInit(200);
+	for (int i = 0; i < n; i++) {
+		if ((buf[i] >= 'A' && buf[i] <= 'Z') ||
+		    (buf[i] >= 'a' && buf[i] <= 'z')) {
+			randomizedQueuePut(buf[i]);
+		}
+
+		if (buf[i] == '*') {
+			printf("%c\n", randomizedQueueGet());
+		}
+	}
+}
+
+int main(int argc, char *argv[])
+{
+	char *buf;
+	size_t n;
+	ssize_t ret;
+	FILE *fp = fopen(argv[1], "rw");
+	if (fp == NULL) {
+		fprintf(stderr, "fopen error\n");
+		exit(-1);
+	}
+
+	ret = getline(&buf, &n, fp);
+	if (ret == -1) {
+		fprintf(stderr, "getline error\n");
+		exit(-1);
+	}
+
+	processBuf(buf, n);
+	return 0;
+}
