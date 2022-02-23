@@ -1,12 +1,14 @@
 
 .PHONY: main
 
-OBJFILE := $(addsuffix .o, $(TARGET))
+SOURCE := $(wildcard ./*.c)
+TARGET := $(SOURCE:.c=.o)
 
 main: $(TARGET)
+	$(CC) $^ -o $@
 
 %.o : %.c
 	$(CC) -g -c $^
 
 clean:
-	$(RM) $(TARGET) $(OBJFILE)
+	$(RM) $(TARGET) main
