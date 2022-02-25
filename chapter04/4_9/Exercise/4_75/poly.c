@@ -84,9 +84,14 @@ static void addFactor(Poly p, polyNode t)
 	polyNode prev = &p->polyHead;
 	polyNode tmp = prev->next;
 
+	if (t->coeff == 0)
+		return;
+
 	while (tmp) {
 		if (t->exp == tmp->exp) {
 			tmp->coeff += t->coeff;
+			if (tmp->coeff == 0)
+				prev->next = tmp->next;
 			return;
 		} else if (t->exp > tmp->exp) {
 			break;
@@ -239,6 +244,56 @@ int POLYdivision(Poly p, Poly q, Poly *r, Poly *reminder)
 		*r = POLYadd(*r, tmp[j]);
 	}
 	return 0;
+}
+
+static Poly polyFactor(polyNode factor)
+{
+	Poly r = malloc(sizeof *r);
+	polyNode cp = malloc(sizeof *cp);
+	cp->coeff = factor->coeff;
+	cp->exp = factor->exp;
+	addFactor(r, cp);
+	return r;
+}
+
+static Poly polysubsti(Poly tmp, Poly q)
+{
+	assert(tmp->polyHead.next && q->polyHead.next);
+
+	Poly coeffPoly;
+	polyNode fst = tmp->polyHead.next;
+	Poly r = POLYcopy(q);
+	Poly mulFactor = POLYcopy(q);
+	for (int i = 1; i < fst->exp; i++) {
+	       r = POLYmult(r, mulFactor);
+	}
+
+	if (fst->exp != 0) {
+		coeffPoly = POLYterm(fst->coeff, 0);
+		r = POLYmult(r, coeffPoly);
+	} else {
+		r = POLYterm(fst->coeff, 0);
+	}
+
+	return r;
+}
+
+Poly POLYcomposition(Poly p, Poly q)
+{
+	int i, j;
+	polyNode pfactor, qfactor;
+	Poly ptmp[100];
+	Poly qtmp[100];
+	for (pfactor = p->polyHead.next, i = 0; pfactor != NULL; pfactor = pfactor->next, i++) {
+		Poly tmp = polyFactor(pfactor);
+		ptmp[i] = polysubsti(tmp, q);
+	}
+	Poly r = ptmp[0];
+
+	for (j = 1; j < i; j++) {
+		r = POLYadd(r, ptmp[j]);
+	}
+	return r;
 }
 
 Poly POLYintegral(Poly p)

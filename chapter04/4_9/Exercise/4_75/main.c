@@ -35,16 +35,20 @@ int main(int argc, char *argv[])
 
 	Poly p, q, r, reminder;
 
-	p = POLYadd(POLYterm(2, 4), POLYterm(1, 2));
+	/*p = POLYadd(POLYterm(2, 4), POLYterm(1, 2));
 	p = POLYadd(p, POLYterm(3, 0));
 
-	q = POLYadd(POLYterm(1, 2), POLYterm(1, 0));
+	q = POLYadd(POLYterm(1, 2), POLYterm(-1, 0));*/
 
-	POLYdivision(p, q, &r, &reminder);
+	p = POLYadd(POLYterm(1, 2), POLYterm(-1, 0));
+	q = POLYadd(POLYterm(1, 1), POLYterm(1, 0));
+
+	//POLYdivision(p, q, &r, &reminder);
+	r = POLYcomposition(p, q);
 
 	showPOLY(p);
 	showPOLY(q);
 	showPOLY(r);
-	showPOLY(reminder);
+	//showPOLY(reminder);
 	return 0;
 }

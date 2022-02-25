@@ -9,3 +9,4 @@ Poly POLYdiff(Poly);
 Poly POLYignore(Poly, int);
 Poly POLYsub(Poly, Poly);
 int POLYdivision(Poly, Poly, Poly*, Poly*);
+Poly POLYcomposition(Poly, Poly);
