@@ -38,6 +38,32 @@ static polyNode removeFactor(Poly p)
 	return t;
 }
 
+static void addFactor(Poly, polyNode);
+Poly POLYcopy(Poly p)
+{
+	Poly r = malloc(sizeof *r);
+	polyNode t = p->polyHead.next;
+	while (t) {
+		polyNode cp = malloc(sizeof *cp);
+		cp->coeff = t->coeff;
+		cp->exp = t->exp;
+		addFactor(r, cp);
+		t = t->next;
+	}
+	return r;
+}
+
+int POLYdestroy(Poly p)
+{
+	polyNode tmp, t = p->polyHead.next;
+	while (t) {
+		tmp = t;
+		t = t->next;
+		free(tmp);
+	}
+	free(p);
+}
+
 static void insertFactor(Poly p, polyNode t)
 {
 	polyNode prev = &p->polyHead;
@@ -194,7 +220,7 @@ int POLYdivision(Poly p, Poly q, Poly *r, Poly *reminder)
 	Poly tmp[100];
 	int i = 0;
 
-	*reminder = p;
+	*reminder = POLYcopy(p);
 	while (1) {
 		getMostExp(*reminder, &pcoeff, &pexp);
 		getMostExp(q, &qcoeff, &qexp);
