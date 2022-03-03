@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 typedef struct largeInt *LI;
 struct largeInt {
@@ -105,6 +106,71 @@ LI LIadd(LI left, LI right)
 	new->bigInt = malloc(sizeof(char) * tmpLen);
 	memcpy(new->bigInt, cpy, tmpLen + 1);*/
 	free(tmp);
+
+	return new;
+}
+
+static void subNum(LI LIleft, char *left, char *right, char *r)
+{
+	int leftNum = *left - '0';
+	int rightNum = *right - '0';
+	char *bp, *bpp;
+
+	if (leftNum >= rightNum) {
+		*r = leftNum - rightNum;
+	} else {
+		assert(LIleft->bigInt - 1 < (unsigned char *) left);
+		bp = left - 1;
+		if (*bp > '0') {
+			*bp = *bp - 1;
+			leftNum = leftNum + 10;
+			*r = leftNum - rightNum;
+		} else {
+			bpp = bp - 1;
+			while (*bpp == '0') {
+				*bp = '9';
+				bp--;
+				bpp--;
+			}
+			*bp = '9';
+			*bpp -= 1;
+			leftNum = leftNum + 10;
+			*r = leftNum - rightNum;
+		}
+	}
+}
+
+LI LIsub(LI left, LI right)
+{
+	LI new;
+	unsigned char *leftp, *rightp;
+	int leftLen = left->bitNum;
+	int rightLen = right->bitNum;
+	int tmpLen, curPos;
+	char *tmp, r, *save;
+	save = malloc(leftLen + 1);
+	memset(save, 0, leftLen + 1);
+	memcpy(save, left->bigInt, leftLen);
+
+	tmpLen = leftLen > rightLen ? leftLen + 1 : rightLen + 1;
+	tmp = malloc(tmpLen + 1);
+	memset(tmp, '0', tmpLen + 1);
+	tmp[tmpLen] = 0;
+	for (leftp = &left->bigInt[leftLen - 1], rightp = &right->bigInt[rightLen - 1], curPos = tmpLen - 1;
+			leftp != left->bigInt - 1 && rightp != right->bigInt - 1;
+			leftp--, rightp--, curPos--) {
+		subNum(left, leftp, rightp, &r);
+		tmp[curPos] = r + '0';
+	}
+
+	for (; leftp != left->bigInt - 1; leftp--, curPos--) {
+		tmp[curPos] = *leftp;
+	}
+
+	new = LIinit(tmp);
+	free(tmp);
+	free(left->bigInt);
+	left->bigInt = save;
 
 	return new;
 }
