@@ -4,11 +4,11 @@
 SOURCE := $(wildcard ./*.c)
 TARGET := $(SOURCE:.c=.o)
 
-main: $(TARGET)
-	$(CC) $^ -o $@
+main: $(TARGET) $(LINK_OBJ)
+	$(CC) -L$(INC) $^ -o $@
 
 %.o : %.c
-	$(CC) -g -c $^
+	$(CC) -I$(INC) -g -c $^
 
 clean:
 	$(RM) $(TARGET) main
