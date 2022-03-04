@@ -69,8 +69,8 @@ int main(void)
 	printLI(lik);
 	printf("\n");*/
 
-	LI a = LIinit("28732891283192378163");
-	LI b = LIinit("-332378109783");
+	LI a = LIinit("2387198371039");
+	LI b = LIinit("291831100");
 
 	LI c, d;
 

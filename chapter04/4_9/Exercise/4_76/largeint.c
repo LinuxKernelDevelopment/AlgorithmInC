@@ -381,7 +381,7 @@ static int LInegative(LI num)
 	return ret == 1;
 }
 
-static LI computeQuot(LI left, LI right)
+/*static LI computeQuot(LI left, LI right)
 {
 	int i, len;
 	char *quotStr;
@@ -392,7 +392,7 @@ static LI computeQuot(LI left, LI right)
 	quotStr[len - 1] = '\0';
 	for (int j = len - 2; j != 0; j--)
 		quotStr[j] = '0';
-	for (i = 1; i < 10; i ++) {
+	for (i = 1; i < 10; i++) {
 		quotStr[0] = '0' + i;
 		quot = LIinit(quotStr);
 		mulRet = LImult(quot, right);
@@ -406,6 +406,46 @@ static LI computeQuot(LI left, LI right)
 	quotStr[0] = '0' + i;
 	quot = LIinit(quotStr);
 	free(quotStr);
+	return quot;
+}*/
+
+static LI computeQuot(LI left, LI right)
+{
+	char *diviStr, *quotStr, *tmpStr;
+	LI divi, quot, mulRet, leftTmp;
+	int quotLen, i;
+	int diviLen = left->bitNum;
+
+	diviStr = malloc(sizeof(char) * (diviLen + 1));
+	memset(diviStr, '0', diviLen);
+	quotStr[diviLen] = '\0';
+
+	for (int i = 0; i < right->bitNum; i++) {
+		diviStr[i] = right->bigInt[i];
+	}
+	divi = LIinit(diviStr);
+	if (LIgreater(divi, left) == 1) {
+		diviStr[diviLen - 1] = '\0';
+		LIdestroy(divi);
+		divi = LIinit(diviStr);
+	}
+
+	tmpStr = malloc(sizeof(char) * left->bitNum);
+	for (i = 0; i < 10; i++) {
+		sprintf(tmpStr, "%d", i);
+		LI tmp = LIinit(tmpStr);
+		mulRet = LImult(tmp, divi);
+		leftTmp = LIsub(left, mulRet);
+		if (LInegative(leftTmp))
+			break;
+	}
+	i -= 1;
+	quotLen = divi->bitNum - right->bitNum + 2;
+	quotStr = malloc(sizeof(char) * quotLen);
+	memset(quotStr, '0', quotLen);
+	quotStr[quotLen - 1] = '\0';
+	quotStr[0] = i + '0';
+	quot = LIinit(quotStr);
 	return quot;
 }
 
