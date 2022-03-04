@@ -2,22 +2,34 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include "largeint.h"
 
 typedef struct largeInt *LI;
 struct largeInt {
+	int negative;
 	int bitNum;
 	unsigned char *bigInt;
 };
 
 LI LIinit(char *num)
 {
+	char *dataptr;
 	int i;
 	LI new;
 
+	new = malloc(sizeof *new);
 	for (i = 0; i < strlen(num); i++) {
-		if (num[i] >= '1' && num[i] <= '9')
+		if (num[i] >= '1' && num[i] <= '9' || num[i] == '-')
 			break;
 	}
+	if (num[i] == '-') {
+		new->negative = 1;
+		dataptr = &num[i] + 1;
+	} else {
+		new->negative = 0;
+		dataptr = &num[i];
+	}
+
 	if (*num == '0' && strlen(num) == 1) {
 		new = malloc(sizeof *new);
 		new->bitNum = 1;
@@ -26,10 +38,12 @@ LI LIinit(char *num)
 		new->bigInt[0] = '0';
 		return new;
 	}
-	new = malloc(sizeof *new);
-	new->bitNum = strlen(num) - i;
+	if (num[i] == '-')
+		new->bitNum = strlen(num) - i - 1;
+	else
+		new->bitNum = strlen(num) - i;
 	new->bigInt = malloc(sizeof(char) * new->bitNum);
-	strncpy(new->bigInt, &num[i], new->bitNum);
+	strncpy(new->bigInt, dataptr, new->bitNum);
 
 	return new;
 }
@@ -38,6 +52,54 @@ void LIdestroy(LI d)
 {
 	free(d->bigInt);
 	free(d);
+}
+
+static int LIabsGreater(LI left, LI right)
+{
+	char *lp, *rp;
+	if (left->bitNum > right->bitNum)
+		return 1;
+	else if (left->bitNum < right->bitNum)
+		return -1;
+	else {
+		for (lp = left->bigInt, rp = right->bigInt;
+				*lp != '\0' && *rp != '\0';
+				lp++, rp++) {
+			if (*lp > *rp)
+				return 1;
+			else if (*lp < *rp)
+				return -1;
+		}
+		return 0;
+	}
+}
+
+int LIgreater(LI left, LI right)
+{
+	if (left->negative == 1 && right->negative == 0)
+		return -1;
+	if (left->negative == 0 && right->negative == 1)
+		return 1;
+	if (left->negative == 1 && right->negative == 1) {
+		switch (LIabsGreater(left, right)) {
+		case 1:
+			return -1;
+		case -1:
+			return 1;
+		case 0:
+			return 0;
+		}
+	}
+	if (left->negative == 0 && right->negative == 0) {
+		switch(LIabsGreater(left, right)) {
+		case 1:
+			return 1;
+		case -1:
+			return -1;
+		case 0:
+			return 0;
+		}
+	}
 }
 
 static void addNum(char left, char right, char *r, char *carry)
@@ -59,12 +121,28 @@ static void addNum(char left, char right, char *r, char *carry)
 LI LIadd(LI left, LI right)
 {
 	unsigned char *leftp, *rightp, *longp, *endp;
-	LI new;
+	LI new, LItmp;
 	char *tmp, *cpy;
 	int leftLen = left->bitNum;
 	int rightLen = right->bitNum;
-	int tmpLen, curPos;
-	char r, carry = 0;
+	int tmpLen, curPos, negative;
+	char r = 0, carry = 0;
+
+	if (left->negative == 1 && right->negative == 1)
+		negative = 1;
+	else if (left->negative == 0 && right->negative == 0)
+		negative = 0;
+	else if (left->negative == 0 && right->negative == 1) {
+		LItmp = LIinit(right->bigInt);
+		LItmp->negative = 0;
+		new = LIsub(left, LItmp);
+		return new;
+	} else if (left->negative == 1 && right->negative == 0) {
+		LItmp = LIinit(left->bigInt);
+		LItmp->negative = 0;
+		new = LIsub(right, LItmp);
+		return new;
+	}
 
 	tmpLen = leftLen > rightLen ? leftLen + 1 : rightLen + 1; // '\0'
 	tmp = malloc(tmpLen + 1);  // carry bit
@@ -101,6 +179,10 @@ LI LIadd(LI left, LI right)
 	}
 
 	new = LIinit(tmp);
+	if (negative)
+		new->negative = 1;
+	else
+		new->negative = 0;
 	/*new = malloc(sizeof *new);
 	new->bitNum = tmpLen;
 	new->bigInt = malloc(sizeof(char) * tmpLen);
@@ -140,18 +222,60 @@ static void subNum(LI LIleft, char *left, char *right, char *r)
 	}
 }
 
+static void switchPointer(LI *left, LI *right)
+{
+	LI tmp;
+	tmp = *left;
+	*left = *right;
+	*right = tmp;
+}
+
 LI LIsub(LI left, LI right)
 {
-	LI new;
+	LI new, LItmp, leftTmp, rightTmp;
+	int negative;
 	unsigned char *leftp, *rightp;
-	int leftLen = left->bitNum;
-	int rightLen = right->bitNum;
+	int leftLen, rightLen;
 	int tmpLen, curPos;
 	char *tmp, r, *save;
 	save = malloc(leftLen + 1);
 	memset(save, 0, leftLen + 1);
 	memcpy(save, left->bigInt, leftLen);
 
+	if (left->negative == 0 && right->negative == 1) {
+		LItmp = LIinit(right->bigInt);
+		LItmp->negative = 0;
+		new = LIadd(left, LItmp);
+		LIdestroy(LItmp);
+		return new;
+	} else if (left->negative == 1 && right->negative == 0) {
+		leftTmp = LIinit(left->bigInt);
+		rightTmp = LIinit(right->bigInt);
+		leftTmp->negative = rightTmp->negative = 0;
+		new = LIadd(leftTmp, rightTmp);
+		new->negative = 1;
+		LIdestroy(leftTmp);
+		LIdestroy(rightTmp);
+		return new;
+	} else if (left->negative == 0 && right->negative == 0) {
+		if (LIgreater(left, right) == 1)
+			negative = 0;
+		else {
+			negative = 1;
+			switchPointer(&left, &right);
+		}
+	} else {
+		rightTmp = LIinit(right->bigInt);
+		rightTmp->negative = 0;
+		leftTmp = LIinit(left->bigInt);
+		leftTmp->negative = 0;
+		new = LIsub(rightTmp, leftTmp);
+		LIdestroy(leftTmp);
+		LIdestroy(rightTmp);
+		return new;
+	}
+
+	leftLen = left->bitNum, rightLen = right->bitNum;
 	tmpLen = leftLen > rightLen ? leftLen + 1 : rightLen + 1;
 	tmp = malloc(tmpLen + 1);
 	memset(tmp, '0', tmpLen + 1);
@@ -168,6 +292,10 @@ LI LIsub(LI left, LI right)
 	}
 
 	new = LIinit(tmp);
+	if (negative)
+		new->negative = 1;
+	else
+		new->negative = 0;
 	free(tmp);
 	free(left->bigInt);
 	left->bigInt = save;
@@ -239,5 +367,8 @@ LI LImult(LI left, LI right)
 
 void printLI(LI li)
 {
-	printf("%s", li->bigInt);
+	if (li->negative)
+		printf("-%s", li->bigInt);
+	else
+		printf("%s", li->bigInt);
 }

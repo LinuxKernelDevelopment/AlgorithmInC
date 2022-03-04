@@ -5,3 +5,4 @@ void printLI(LI);
 void LIdestroy(LI);
 LI LImult(LI, LI);
 LI LIsub(LI, LI);
+int LIgreater(LI, LI);
