@@ -45,7 +45,7 @@ int main(void)
 	LIdestroy(lic);
 	return 0;*/
 
-	char *a = "-1009278", *b = "100";
+	/*char *a = "-1009278", *b = "100";
 	LI lia = LIinit(a);
 	LI lib = LIinit(b);
 	LI lic = LIadd(lia, lib);
@@ -67,6 +67,17 @@ int main(void)
 	printLI(lih);
 	printf("\n");
 	printLI(lik);
+	printf("\n");*/
+
+	LI a = LIinit("28732891283192378163");
+	LI b = LIinit("-332378109783");
+
+	LI c, d;
+
+	LIdiv(a, b, &c, &d);
+	printLI(c);
+	printf("\n");
+	printLI(d);
 	printf("\n");
 	return 0;
 }

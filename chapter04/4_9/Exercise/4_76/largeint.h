@@ -6,3 +6,4 @@ void LIdestroy(LI);
 LI LImult(LI, LI);
 LI LIsub(LI, LI);
 int LIgreater(LI, LI);
+void LIdiv(LI, LI, LI *, LI *);

@@ -36,14 +36,16 @@ LI LIinit(char *num)
 		new->bigInt = malloc(sizeof(char) * 2);
 		new->bigInt[1] = 0;
 		new->bigInt[0] = '0';
+		new->negative = 0;
 		return new;
 	}
 	if (num[i] == '-')
 		new->bitNum = strlen(num) - i - 1;
 	else
 		new->bitNum = strlen(num) - i;
-	new->bigInt = malloc(sizeof(char) * new->bitNum);
-	strncpy(new->bigInt, dataptr, new->bitNum);
+	new->bigInt = malloc(sizeof(char) * (new->bitNum + 1));
+	memset(new->bigInt, 0, new->bitNum + 1);
+	memcpy(new->bigInt, dataptr, new->bitNum);
 
 	return new;
 }
@@ -238,9 +240,6 @@ LI LIsub(LI left, LI right)
 	int leftLen, rightLen;
 	int tmpLen, curPos;
 	char *tmp, r, *save;
-	save = malloc(leftLen + 1);
-	memset(save, 0, leftLen + 1);
-	memcpy(save, left->bigInt, leftLen);
 
 	if (left->negative == 0 && right->negative == 1) {
 		LItmp = LIinit(right->bigInt);
@@ -280,6 +279,11 @@ LI LIsub(LI left, LI right)
 	tmp = malloc(tmpLen + 1);
 	memset(tmp, '0', tmpLen + 1);
 	tmp[tmpLen] = 0;
+
+	save = malloc(leftLen + 1);
+	memset(save, 0, leftLen + 1);
+	memcpy(save, left->bigInt, leftLen);
+
 	for (leftp = &left->bigInt[leftLen - 1], rightp = &right->bigInt[rightLen - 1], curPos = tmpLen - 1;
 			leftp != left->bigInt - 1 && rightp != right->bigInt - 1;
 			leftp--, rightp--, curPos--) {
@@ -347,6 +351,7 @@ LI LImult(LI left, LI right)
 	unsigned char *leftp, *rightp;
 	LI *tmp;
 	LI sum = LIinit("0");
+	int negative = left->negative ^ right->negative;
 
 	int leftLen = left->bitNum;
 	int rightLen = right->bitNum;
@@ -362,7 +367,103 @@ LI LImult(LI left, LI right)
 	for (int i = 0; i < rightLen; i++) {
 		sum = LIadd(sum, tmp[i]);
 	}
+	sum->negative = negative;
 	return sum;
+}
+
+static int LInegative(LI num)
+{
+	int ret;
+	LI zero = LIinit("0");
+
+	ret = LIgreater(zero, num);
+
+	return ret == 1;
+}
+
+static LI computeQuot(LI left, LI right)
+{
+	int i, len;
+	char *quotStr;
+	LI quot, mulRet, leftTmp;
+
+	len = left->bitNum - right->bitNum + 1;
+	quotStr = malloc(sizeof(char) * (len));
+	quotStr[len - 1] = '\0';
+	for (int j = len - 2; j != 0; j--)
+		quotStr[j] = '0';
+	for (i = 1; i < 10; i ++) {
+		quotStr[0] = '0' + i;
+		quot = LIinit(quotStr);
+		mulRet = LImult(quot, right);
+		leftTmp = LIsub(left, mulRet);
+		if (LInegative(leftTmp))
+			break;
+		LIdestroy(quot);
+		LIdestroy(leftTmp);
+	}
+	i -= 1;
+	quotStr[0] = '0' + i;
+	quot = LIinit(quotStr);
+	free(quotStr);
+	return quot;
+}
+
+static LI LIabs(LI num)
+{
+	LI new;
+
+	new = LIinit(num->bigInt);
+	new->negative = 0;
+
+	return new;
+}
+
+void LIdiv(LI left, LI right, LI *result, LI *remain)
+{
+	int negative;
+	LI quotient;
+	LI leftTmp, rightTmp, loopTmp, mulRet;
+	LI *tmp;
+	int idx = 0;
+	LI sum = LIinit("0");
+
+	negative = left->negative ^ right->negative;
+	leftTmp = LIabs(left);
+	rightTmp = LIabs(right);
+
+	if (LIgreater(rightTmp, leftTmp) == 1) {
+		*result = LIinit("0");
+		*remain = LIsub(leftTmp, *result);
+		return;
+	}
+
+	tmp = malloc(sizeof(LI) * (leftTmp->bitNum - rightTmp->bitNum));
+	while (LIgreater(leftTmp, rightTmp) == 1) {
+		quotient = computeQuot(leftTmp, rightTmp);
+		mulRet = LImult(rightTmp, quotient);
+		loopTmp = LIsub(leftTmp, mulRet);
+		tmp[idx++] = quotient;
+		LIdestroy(mulRet);
+		LIdestroy(leftTmp);
+		leftTmp = loopTmp;
+	}
+
+	for (int i = 0; i < idx; i++) {
+		sum = LIadd(sum, tmp[i]);
+	}
+
+	sum->negative = negative;
+	if (negative) {
+		LI tmp = LIinit("1");
+		LI nc = LIsub(sum, tmp);
+		LIdestroy(tmp);
+		LIdestroy(sum);
+		sum = nc;
+	}
+	*result = sum;
+	mulRet = LImult(sum, right);
+	*remain = LIsub(left, mulRet);
 }
 
 void printLI(LI li)
