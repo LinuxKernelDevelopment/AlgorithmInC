@@ -418,7 +418,7 @@ static LI computeQuot(LI left, LI right)
 
 	diviStr = malloc(sizeof(char) * (diviLen + 1));
 	memset(diviStr, '0', diviLen);
-	quotStr[diviLen] = '\0';
+	diviStr[diviLen] = '\0';
 
 	for (int i = 0; i < right->bitNum; i++) {
 		diviStr[i] = right->bigInt[i];
