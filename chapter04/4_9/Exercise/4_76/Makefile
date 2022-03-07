@@ -1,5 +1,5 @@
 -include ../../../../build.rule
 
-library: $(TARGET)
+library: largeint.o
 	$(AR) rcs largeint.a $^
 
