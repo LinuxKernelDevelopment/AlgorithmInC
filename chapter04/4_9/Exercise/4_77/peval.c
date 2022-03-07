@@ -38,6 +38,30 @@ int main(int argc, char *argv[])
 			STACKpush(LImult(STACKpop(), STACKpop()));
 			continue;
 		}
+		if (line[i] == '-') {
+			LI right = STACKpop();
+			LI left = STACKpop();
+			STACKpush(LIsub(left, right));
+			continue;
+		}
+		if (line[i] == '/') {
+			LI right = STACKpop();
+			LI left = STACKpop();
+			LI result, remain;
+
+			LIdiv(left, right, &result, &remain);
+			STACKpush(result);
+			continue;
+		}
+		if (line[i] == '%') {
+			LI right = STACKpop();
+			LI left = STACKpop();
+			LI result, remain;
+
+			LIdiv(left, right, &result, &remain);
+			STACKpush(remain);
+			continue;
+		}
 		//if ((a[i] >= '0') && (a[i] <= '9'))
 			//STACKpush(0);
 		while ((line[i] >= '0') && (line[i] <= '9')) {
