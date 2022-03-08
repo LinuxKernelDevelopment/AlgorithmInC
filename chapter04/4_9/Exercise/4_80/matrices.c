@@ -19,10 +19,6 @@ static MA allocMatric(int row, int col)
 	for (i = 0; i < row; i++) {
 		c->ma[i] = malloc(sizeof(int) * col);
 		assert(c->ma[i]);
-		for (j = 0; j < col; j++) {
-			c->ma[i][j] = malloc(sizeof(int));
-			assert(c->ma[i][j]);
-		}
 	}
 	return c;
 }
@@ -41,7 +37,15 @@ MA initMatrice(int *a, int row, int col)
 	return c;
 }
 
-MA matriceAddition(MA a, MA b)
+void destroyMatrice(MA a)
+{
+	int i;
+	for (i = 0; i < a->row; i++)
+		free(a->ma[i]);
+	free(a->ma);
+}
+
+MA matriceAddSub(MA a, MA b, int addFlag)
 {
 	int i, j;
 	MA c;
@@ -50,11 +54,50 @@ MA matriceAddition(MA a, MA b)
 	c = allocMatric(a->row, a->col);
 	for (i = 0; i < a->row; i++) {
 		for (j = 0; j < a->col; j++) {
-			c->ma[i][j] = a->ma[i][j] + b->ma[i][j];
+			if (addFlag)
+				c->ma[i][j] = a->ma[i][j] + b->ma[i][j];
+			else
+				c->ma[i][j] = a->ma[i][j] - b->ma[i][j];
 		}
 	}
 	c->row = a->row;
 	c->col = a->col;
+	return c;
+}
+
+MA matriceMul(MA a, MA b)
+{
+	MA c;
+	int sum = 0, i, j, k;
+	assert(a->row == b->col);
+
+	c = allocMatric(a->row, b->col);
+	for (i = 0; i < a->row; i++) {
+		for (j = 0; j < b->col; j++) {
+			for (k = 0; k < b->row; k++)
+				sum += a->ma[i][k] * b->ma[k][j];
+			c->ma[i][j] = sum;
+			sum = 0;
+		}
+	}
+	c->row = a->row;
+	c->col = b->col;
+	return c;
+}
+
+MA matriceDiv(MA a, int b)
+{
+	MA c;
+	int i, j;
+
+	c = allocMatric(a->row, a->col);
+	c->row = a->row;
+	c->col = a->col;
+	for (i = 0; i < a->row; i++) {
+		for (j = 0; j < a->col; j++) {
+			c->ma[i][j] = a->ma[i][j] / b;
+		}
+	}
 	return c;
 }
 
