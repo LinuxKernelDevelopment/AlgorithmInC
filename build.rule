@@ -5,10 +5,10 @@ SOURCE := $(wildcard ./*.c)
 TARGET := $(SOURCE:.c=.o)
 
 main: $(TARGET) $(LINK_OBJ)
-	$(CC) $^ -o $@
+	$(CC) -fsanitize=address $^ -o $@
 
 %.o : %.c
-	$(CC) -O0 -g -c $^
+	$(CC) -g3 -fsanitize=address -c $^
 
 clean:
 	$(RM) $(TARGET) main
