@@ -6,7 +6,7 @@
 typedef struct set *Set;
 struct set {
 	int M;
-	int *array;
+	char *array;
 };
 
 Set setInit(int M)
@@ -16,10 +16,16 @@ Set setInit(int M)
 	s = malloc(sizeof *s);
 	assert(s);
 	s->array = calloc(sizeof(char), M);
-	assert(s->array);
-	memset(s->array, 0, M * sizeof(char));
+	for (int i = 0; i < M; i++)
+		s->array[i] = 0;
 	s->M = M;
 	return s;
+}
+
+void setDestroy(Set a)
+{
+	free(a->array);
+	free(a);
 }
 
 void setEnter(Set a, int c)
@@ -85,9 +91,7 @@ void printSet(Set a)
 
 	for (i = 0; i < M; i++) {
 		if (a->array[i])
-			printf("%d", i);
-		if (a->array[i] && i != M - 1)
-			printf(", ");
+			printf("%d\t", i);
 	}
 	printf("\n");
 }

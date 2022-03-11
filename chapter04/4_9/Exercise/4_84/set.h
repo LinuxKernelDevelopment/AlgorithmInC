@@ -7,5 +7,6 @@ Set setUnion(Set, Set);
 Set setIntersection(Set, Set);
 Set setComplement(Set);
 Set setDifference(Set, Set);
+void setDestroy(Set);
 void printSet(Set);
 #endif
