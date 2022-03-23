@@ -11,6 +11,13 @@ struct largeInt {
 	unsigned char *bigInt;
 };
 
+int isLIone(LI li)
+{
+	if (li->negative == 0 && strcmp(li->bigInt, "1") == 0)
+		return 1;
+	return 0;
+}
+
 LI LIinit(char *num)
 {
 	char *dataptr;
