@@ -4,11 +4,17 @@
 SOURCE := $(wildcard ./*.c)
 TARGET := $(SOURCE:.c=.o)
 
+ifeq ($(fsanitize),)
+	OPTION :=
+else
+	OPTION := -fsanitize=address
+endif
+
 main: $(TARGET) $(LINK_OBJ)
-	$(CC) -fsanitize=address $^ -o $@
+	$(CC) $(OPTION) $^ -o $@ -lm
 
 %.o : %.c
-	$(CC) -g3 -fsanitize=address -c $^
+	$(CC) -g3 $(OPTION) -c $^
 
 clean:
 	$(RM) $(TARGET) main
