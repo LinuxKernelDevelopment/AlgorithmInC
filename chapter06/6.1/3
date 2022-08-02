@@ -1,0 +1,2 @@
+1. Give card a sequence. (diamonds > clubs > hearts > spades) (K - 1)
+2. Use insertion sort for it.
